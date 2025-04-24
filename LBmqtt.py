@@ -45,6 +45,16 @@ def setup_mqtt(client_id=None, broker=BROKERREMOTE, port=1883):
         raise ValueError("El prefijo global no está definido.")
 
 
+def disconnect():
+    """Desconecta el cliente MQTT y detiene el bucle."""
+    global _client
+    if _client:
+        _client.loop_stop()
+        _client.disconnect()
+        _client = None
+    else:
+        raise RuntimeError("MQTT no está inicializado. Llama a setup_mqtt primero.")
+
 def publish(topic, message, qos=2, retain=False):
     """Publica un mensaje en un topic con el prefijo aplicado."""
     if _client:

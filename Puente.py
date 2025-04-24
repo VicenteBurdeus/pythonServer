@@ -36,7 +36,7 @@ def parse_int(value):
 
 def init():
     # Inicializa el socket y la conexión a la base de datos
-    
+    LBmqtt.disconnect()
     if W.PCSERVIDOR == 0:
         LBmqtt.setup_mqtt(client_id="Puente_Server",broker=LBmqtt.BROKER, port=1883)
     elif W.PCSERVIDOR < 100:
