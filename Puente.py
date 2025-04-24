@@ -53,7 +53,7 @@ def NodeTemperature(topic, payload):
         print(f"Alerta: Batería baja en el nodo {node_id}: {battery}%")
 
         
-        LBmqtt.publish(f"PR2/A9/temperatura/{node_id}", f"Temperatura del nodo {node_id} es de: {temperature}°C")
+    LBmqtt.publish(f"PR2/A9/temperatura/{node_id}", f"Temperatura del nodo {node_id} es de: {temperature}°C")
     
     if W.PCSERVIDOR == 1:
         pass
