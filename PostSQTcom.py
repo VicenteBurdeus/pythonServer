@@ -33,11 +33,11 @@ def uploadBD(table: str, columns: str, values: tuple):
         raise TypeError("Los valores deben ser una tupla o lista.")
     
     # Construcción segura de la consulta SQL usando parámetros
-    query = f"INSERT INTO {table} ({columns}) VALUES ({', '.join(['%s'] * len(values))})"
+    query = f"INSERT INTO {table} ({columns}) VALUES ({values})"
     
     # Ejecutar la consulta de manera segura con parámetros
     _ensure_connection()  # Aseguramos la conexión
-    _cursor.execute(query, values)  # Ejecutamos con los parámetros
+    _cursor.execute(query)  # Ejecutamos con los parámetros
     _conn.commit()  # Confirmamos la transacción
 
 
