@@ -96,7 +96,7 @@ def NodeTemperature(topic, payload):
         print(f"ID: {node_id}, Temperatura: {temperature}, Humedad: {humidity}, Batería: {battery}")
 
 def agvEnd(topic, payload):
-    tags = ("id_agv, estado, carga")
+    tags = ("id_robot, estado, carga")
     NOMBRETABLAAGV = "robotagvinfo"
 
     try:
