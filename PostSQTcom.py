@@ -2,7 +2,7 @@ import psycopg2
 
 # Configura tu conexión a PostgreSQL
 DB_CONFIG = {
-    'dbname': 'queso',
+    'dbname': 'Queso',
     'user': 'admin',
     'password': 'admin',
     'host': 'localhost',
