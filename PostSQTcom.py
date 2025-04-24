@@ -21,24 +21,27 @@ def _ensure_connection():
 
 def uploadBD(table: str, columns: str, values: tuple):
     """Ejecuta una sentencia INSERT en la base de datos usando parámetros para evitar inyecciones SQL."""
-    
     if not columns or not columns.strip():
         raise ValueError("Las columnas no pueden estar vacías.")
     
     if not values:
         raise ValueError("Los valores no pueden estar vacíos.")
     
-    # Asegurarse de que 'values' sea una tupla o lista de valores
     if not isinstance(values, (tuple, list)):
         raise TypeError("Los valores deben ser una tupla o lista.")
     
-    # Construcción segura de la consulta SQL usando parámetros
-    query = f"INSERT INTO {table} ({columns}) VALUES ({values})"
-    
-    # Ejecutar la consulta de manera segura con parámetros
-    _ensure_connection()  # Aseguramos la conexión
-    _cursor.execute(query)  # Ejecutamos con los parámetros
-    _conn.commit()  # Confirmamos la transacción
+    try:
+        # Preparar placeholders seguros para los valores
+        placeholders = ', '.join(['%s'] * len(values))
+        query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
+        
+        _ensure_connection()
+        _cursor.execute(query, values)
+        _conn.commit()
+    except Exception as e:
+        print(f"[uploadBD] Error al insertar en la base de datos: {e}")
+        raise
+
 
 
 def request(query: str):

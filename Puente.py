@@ -87,9 +87,11 @@ def NodeTemperature(topic, payload):
     LBmqtt.publish(f"PR2/A9/temperatura/{node_id}", f"Temperatura del nodo {node_id} es de: {temperature}°C con una humadad de: {humidity}%")
     
     if W.PCSERVIDOR == 0:
-        pass
-        SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
-
+        if battery is not None:
+            SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
+        else:
+            SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, "NULL"))
+        
 
 init()
 
