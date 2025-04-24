@@ -54,6 +54,7 @@ def init():
 def NodeTemperature(topic, payload):
 
     tags = ("id_nodo, temperatura, humedad, bateria")
+    tagsnobattery = ("id_nodo, temperatura, humedad")
     NOMBRETABLANT = "ntdato"
 
     try:
@@ -84,13 +85,13 @@ def NodeTemperature(topic, payload):
         #print(f"Alerta: Batería baja en el nodo {node_id}: {battery}%")
 
         
-    LBmqtt.publish(f"PR2/A9/temperatura/{node_id}", f"Temperatura del nodo {node_id} es de: {temperature}°C con una humadad de: {humidity}%")
+    #LBmqtt.publish(f"PR2/A9/temperatura/{node_id}", f"Temperatura del nodo {node_id} es de: {temperature}°C con una humadad de: {humidity}%")
     
     if W.PCSERVIDOR == 0:
         if battery is not None:
             SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
         else:
-            SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, "NULL"))
+            SQL.uploadBD(NOMBRETABLANT, tagsnobattery, (node_id, temperature, humidity))
     else:
         print(f"ID: {node_id}, Temperatura: {temperature}, Humedad: {humidity}, Batería: {battery}")
 
