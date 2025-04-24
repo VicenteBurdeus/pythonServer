@@ -8,6 +8,18 @@ import LBmqtt
 import PostSQTcom as SQL
 
 
+def parse_float(value):
+    """Convierte un valor de texto en un número flotante, manejando comas y redondeo."""
+    if isinstance(value, str):
+        # Reemplaza las comas por puntos
+        value = value.replace(",", ".")
+    try:
+        # Convierte el valor a float y lo redondea a 2 decimales (puedes ajustar la precisión)
+        return round(float(value), 2)
+    except ValueError:
+        print(f"Error al convertir el valor a float: {value}")
+        return None
+
 def init():
     # Inicializa el socket y la conexión a la base de datos
     
@@ -28,7 +40,7 @@ def NodeTemperature(topic, payload):
     try:
         data = json.loads(payload)
         node_id = data.get("ID")
-        temperature = float(data.get("temperatura"))
+        temperature = parse_float(data.get("temperatura"))
         humidity = int(data.get("humedad"))
 
         # Battery puede ser None si no está o no es un número
