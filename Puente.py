@@ -38,9 +38,9 @@ def init():
     # Inicializa el socket y la conexión a la base de datos
     
     if W.PCSERVIDOR == 0:
-        LBmqtt.setup_mqtt(client_id="Puente",broker=LBmqtt.BROKERREMOTE, port=1883)
+        LBmqtt.setup_mqtt(client_id="Puente",broker=LBmqtt.BROKER, port=1883)
     elif W.PCSERVIDOR != 0:
-        LBmqtt.setup_mqtt(client_id=f"Puente{W.PCSERVIDOR}",broker=LBmqtt.BROKER, port=1883)
+        LBmqtt.setup_mqtt(client_id=f"Puente{W.PCSERVIDOR}",broker=LBmqtt.BROKERREMOTE, port=1883)
     
     LBmqtt.register_callback("NT", NodeTemperature)
 
