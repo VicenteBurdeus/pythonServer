@@ -38,12 +38,17 @@ def init():
     # Inicializa el socket y la conexión a la base de datos
     
     if W.PCSERVIDOR == 0:
-        LBmqtt.setup_mqtt(client_id="Puente",broker=LBmqtt.BROKER, port=1883)
-    elif W.PCSERVIDOR != 0:
+        LBmqtt.setup_mqtt(client_id="Puente_Server",broker=LBmqtt.BROKER, port=1883)
+    elif W.PCSERVIDOR < 100:
         LBmqtt.setup_mqtt(client_id=f"Puente{W.PCSERVIDOR}",broker=LBmqtt.BROKERREMOTE, port=1883)
-    
+    elif W.PCSERVIDOR >= 100:
+        LBmqtt.setup_mqtt(client_id=f"Puente_NO_VPN{W.PCSERVIDOR}",broker=LBmqtt.BROKERREMOTE, port=1883)
+    else:
+        raise RuntimeError("Error en la configuración del puente")
+
     LBmqtt.register_callback("NT", NodeTemperature)
-    LBmqtt.publish("PR2/A9/estado", "Conectado a la red")
+
+    LBmqtt.publish("PR2/A9/estado", "Puente activo")
     
 
 def NodeTemperature(topic, payload):
@@ -76,12 +81,12 @@ def NodeTemperature(topic, payload):
     # Alerta si la batería es baja
     if battery is not None and battery < 20:
         LBmqtt.publish(f"PR2/A9/alerta/{node_id}", f"Batería baja: {battery}%")
-        print(f"Alerta: Batería baja en el nodo {node_id}: {battery}%")
+        #print(f"Alerta: Batería baja en el nodo {node_id}: {battery}%")
 
         
     LBmqtt.publish(f"PR2/A9/temperatura/{node_id}", f"Temperatura del nodo {node_id} es de: {temperature}°C con una humadad de: {humidity}%")
     
-    if W.PCSERVIDOR == 1:
+    if W.PCSERVIDOR == 0:
         pass
         #SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
 
