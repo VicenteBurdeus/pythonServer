@@ -40,6 +40,7 @@ def uploadBD(table: str, columns: str, values: tuple):
         _conn.commit()
     except Exception as e:
         print(f"[uploadBD] Error al insertar en la base de datos: {e}")
+        _conn.rollback()  # Deshacer cambios en caso de error
         raise
 
 
