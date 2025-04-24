@@ -75,7 +75,7 @@ def NodeTemperature(topic, payload):
 
     # Alerta si la batería es baja
     if battery is not None and battery < 20:
-        #LBmqtt.publish(f"PR2/A9/alerta/{node_id}", f"Batería baja: {battery}%")
+        LBmqtt.publish(f"PR2/A9/alerta/{node_id}", f"Batería baja: {battery}%")
         print(f"Alerta: Batería baja en el nodo {node_id}: {battery}%")
 
         
@@ -83,7 +83,7 @@ def NodeTemperature(topic, payload):
     
     if W.PCSERVIDOR == 1:
         pass
-        SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
+        #SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
 
 
 
