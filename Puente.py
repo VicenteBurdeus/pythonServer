@@ -9,6 +9,8 @@ import PostSQTcom as SQL
 
 
 def parse_float(value):
+    if value is None:
+        return None
     """Convierte un valor de texto en un número flotante, manejando comas y redondeo."""
     if isinstance(value, str):
         # Reemplaza las comas por puntos
@@ -19,6 +21,18 @@ def parse_float(value):
     except ValueError:
         print(f"Error al convertir el valor a float: {value}")
         return None
+
+def parse_int(value):
+    if value is None:
+        return None
+    """Convierte un valor de texto en un número entero, manejando comas y redondeo."""
+    if isinstance(value, str):
+        value = value.replace(",", ".").strip()  # Reemplaza las comas por puntos y elimina espacios
+    try:
+        return round(float(value))  # Convierte el valor a float y luego lo redondea a entero
+    except ValueError as e:
+        print(f"Error al convertir el valor '{value}' a entero: {e}")
+        return None  # Devuelve None si no puede convertirse
 
 def init():
     # Inicializa el socket y la conexión a la base de datos
@@ -41,10 +55,10 @@ def NodeTemperature(topic, payload):
         data = json.loads(payload)
         node_id = data.get("ID")
         temperature = parse_float(data.get("temperatura"))
-        humidity = int(data.get("humedad"))
+        humidity = parse_int(data.get("humedad"))
 
         # Battery puede ser None si no está o no es un número
-        raw_battery = data.get("battery")
+        raw_battery = parse_int(data.get("battery"))
         try:
             battery = int(raw_battery) if raw_battery is not None else None
         except (ValueError, TypeError):
@@ -65,7 +79,7 @@ def NodeTemperature(topic, payload):
         print(f"Alerta: Batería baja en el nodo {node_id}: {battery}%")
 
         
-    LBmqtt.publish(f"PR2/A9/temperatura/{node_id}", f"Temperatura del nodo {node_id} es de: {temperature}°C")
+    LBmqtt.publish(f"PR2/A9/temperatura/{node_id}", f"Temperatura del nodo {node_id} es de: {temperature}°C con una humadad de: {humidity}%")
     
     if W.PCSERVIDOR == 1:
         pass
