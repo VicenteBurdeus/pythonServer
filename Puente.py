@@ -53,7 +53,7 @@ def init():
 
 def NodeTemperature(topic, payload):
 
-    tags = "ID,temperatura,humedad,battery"
+    tags = "id_nodo,temperatura,humedad,bateria"
     NOMBRETABLANT = "ntdato"
 
     try:
