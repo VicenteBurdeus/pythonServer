@@ -6,7 +6,7 @@ import json
 import LBmqtt
 import PostSQTcom as SQL
 
-PCSERVIDOR = 0 # 0 = PC, 1 = Servidor
+PCSERVIDOR = 1 # 0 = PC, 1 = Servidor
 
 def init():
     # Inicializa el socket y la conexión a la base de datos
@@ -49,15 +49,15 @@ def NodeTemperature(topic, payload):
 
     # Alerta si la batería es baja
     if battery is not None and battery < 20:
-        LBmqtt.publish(f"PR2/A9/alerta/{node_id}", f"Batería baja: {battery}%")
+        #LBmqtt.publish(f"PR2/A9/alerta/{node_id}", f"Batería baja: {battery}%")
         print(f"Alerta: Batería baja en el nodo {node_id}: {battery}%")
 
         
         LBmqtt.publish(f"PR2/A9/temperatura/{node_id}", f"Temperatura del nodo {node_id} es de: {temperature}°C")
     
     if PCSERVIDOR == 1:
-
-        SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
+        pass
+        #SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
 
 
 
