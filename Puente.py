@@ -47,13 +47,12 @@ def init():
         raise RuntimeError("Error en la configuración del puente")
 
     LBmqtt.register_callback("NT", NodeTemperature)
-    LBmqtt.register_callback("AGV#", agvEnd)
+    LBmqtt.register_callback("AGV", agvEnd)
 
     LBmqtt.publish("PR2/A9/estado", "Puente activo")
     
 
 def NodeTemperature(topic, payload):
-    LBmqtt.publish("PR2/A9/estado", "NT detectado")
     tags = ("id_nodo, temperatura, humedad, bateria")
     tagsnobattery = ("id_nodo, temperatura, humedad")
     NOMBRETABLANT = "ntdato"
