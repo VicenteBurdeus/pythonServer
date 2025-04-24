@@ -2,9 +2,9 @@ import psycopg2
 
 # Configura tu conexión a PostgreSQL
 DB_CONFIG = {
-    'dbname': 'midb',
-    'user': 'miusuario',
-    'password': 'miclave',
+    'dbname': 'postgres',
+    'user': 'admin',
+    'password': 'admin',
     'host': 'localhost',
     'port': 5432
 }
