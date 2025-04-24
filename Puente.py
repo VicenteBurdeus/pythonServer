@@ -53,7 +53,7 @@ def init():
 
 def NodeTemperature(topic, payload):
 
-    tags = "id_nodo,temperatura,humedad,bateria"
+    tags = ["id_nodo","temperatura","humedad","bateria"]
     NOMBRETABLANT = "ntdato"
 
     try:
@@ -91,7 +91,8 @@ def NodeTemperature(topic, payload):
             SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
         else:
             SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, "NULL"))
-        
+    else:
+        print(f"ID: {node_id}, Temperatura: {temperature}, Humedad: {humidity}, Batería: {battery}")
 
 init()
 
