@@ -102,7 +102,7 @@ def agvEnd(topic, payload):
 
     try:
         data = json.loads(payload)
-        agv_id = data.get("id_agv")
+        agv_id = data.get("ID")
         state = data.get("estado")
         load = parse_int(data.get("carga"))
     except json.JSONDecodeError:
