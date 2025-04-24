@@ -54,7 +54,7 @@ def init():
 def NodeTemperature(topic, payload):
 
     tags = "ID,temperatura,humedad,battery"
-    NOMBRETABLANT = "sensores"
+    NOMBRETABLANT = "ntdato"
 
     try:
         data = json.loads(payload)
