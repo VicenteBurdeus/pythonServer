@@ -53,8 +53,8 @@ def disconnect():
         _client.disconnect()
         _client = None
     else:
-        raise RuntimeError("MQTT no está inicializado. Llama a setup_mqtt primero.")
-
+        pass
+    
 def publish(topic, message, qos=2, retain=False):
     """Publica un mensaje en un topic con el prefijo aplicado."""
     if _client:
