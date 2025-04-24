@@ -43,7 +43,7 @@ def init():
         LBmqtt.setup_mqtt(client_id=f"Puente{W.PCSERVIDOR}",broker=LBmqtt.BROKERREMOTE, port=1883)
     
     LBmqtt.register_callback("NT", NodeTemperature)
-
+    LBmqtt.publish("PR2/A9/estado", "Conectado a la red")
     
 
 def NodeTemperature(topic, payload):
