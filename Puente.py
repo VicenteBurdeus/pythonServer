@@ -83,7 +83,7 @@ def NodeTemperature(topic, payload):
     
     if W.PCSERVIDOR == 1:
         pass
-        #SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
+        SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
 
 
 
