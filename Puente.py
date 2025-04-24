@@ -7,7 +7,6 @@ import where as W
 import LBmqtt
 import PostSQTcom as SQL
 
-W.PCSERVIDOR =  # 0 = PC, 1 = Servidor
 
 def init():
     # Inicializa el socket y la conexión a la base de datos
