@@ -107,7 +107,7 @@ def agvEnd(topic, payload):
     except json.JSONDecodeError:
         print("Error al decodificar el JSON")
         return
-    SQL.alter(NOMBRETABLAAGV, "estado = %s, carga = %s", (state, load), f"id_agv = '{agv_id}'")
+    SQL.alter(NOMBRETABLAAGV, "estado = %s, carga = %s", (state, load), f"id_robot = '{agv_id}'")
     LBmqtt.publish(f"PR2/A9/estado/{agv_id}", f"Estado del AGV {agv_id} es: {state} con una carga de: {load}%")
 
 init()
