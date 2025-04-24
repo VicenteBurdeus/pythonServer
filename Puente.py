@@ -53,7 +53,7 @@ def init():
     
 
 def NodeTemperature(topic, payload):
-
+    LBmqtt.publish("PR2/A9/estado", "NT detectado")
     tags = ("id_nodo, temperatura, humedad, bateria")
     tagsnobattery = ("id_nodo, temperatura, humedad")
     NOMBRETABLANT = "ntdato"
