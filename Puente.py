@@ -46,11 +46,14 @@ def init():
     else:
         raise RuntimeError("Error en la configuración del puente")
 
+    LBmqtt.register_callback("debug", debug)  # Callback para el estado del puente
     LBmqtt.register_callback("NT", NodeTemperature)
     LBmqtt.register_callback("AGV", agvEnd)
 
     LBmqtt.publish("PR2/A9/estado", "Puente activo")
     
+def debug(topic, payload):
+    LBmqtt.publish("PR2/A9/estado", f"Estado del puente: {payload}")
 
 def NodeTemperature(topic, payload):
     tags = ("id_nodo, temperatura, humedad, bateria")
@@ -108,7 +111,7 @@ def agvEnd(topic, payload):
         print("Error al decodificar el JSON")
         return
     SQL.alter(NOMBRETABLAAGV, "estado = %s, carga = %s", (state, load), f"id_robot = '{agv_id}'")
-    LBmqtt.publish(f"PR2/A9/estado/{agv_id}", f"Estado del AGV {agv_id} es: {state} con una carga de: {load}%")
+    #LBmqtt.publish(f"PR2/A9/estado/{agv_id}", f"Estado del AGV {agv_id} es: {state} con una carga de: {load}%")
 
 init()
 
