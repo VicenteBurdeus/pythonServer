@@ -3,17 +3,18 @@ import threading
 import time
 import json
 
+import where as W
 import LBmqtt
 import PostSQTcom as SQL
 
-PCSERVIDOR = 1 # 0 = PC, 1 = Servidor
+W.PCSERVIDOR =  # 0 = PC, 1 = Servidor
 
 def init():
     # Inicializa el socket y la conexión a la base de datos
     
-    if PCSERVIDOR == 0:
+    if W.PCSERVIDOR == 0:
         LBmqtt.setup_mqtt(client_id="Puente",broker=LBmqtt.BROKERREMOTE, port=1883)
-    elif PCSERVIDOR == 1:
+    elif W.PCSERVIDOR == 1:
         LBmqtt.setup_mqtt(client_id="Puente",broker=LBmqtt.BROKER, port=1883)
     
     LBmqtt.register_callback("NT", NodeTemperature)
@@ -55,7 +56,7 @@ def NodeTemperature(topic, payload):
         
         LBmqtt.publish(f"PR2/A9/temperatura/{node_id}", f"Temperatura del nodo {node_id} es de: {temperature}°C")
     
-    if PCSERVIDOR == 1:
+    if W.PCSERVIDOR == 1:
         pass
         #SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
 
