@@ -52,8 +52,6 @@ def disconnect():
         _client.loop_stop()
         _client.disconnect()
         _client = None
-    else:
-        pass
     
 def publish(topic, message, qos=2, retain=False):
     """Publica un mensaje en un topic con el prefijo aplicado."""
