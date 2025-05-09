@@ -49,6 +49,7 @@ def init():
     LBmqtt.register_callback("debug", debug)  # Callback para el estado del puente
     LBmqtt.register_callback("NT", NodeTemperature)
     LBmqtt.register_callback("AGV", agvEnd)
+    LBmqtt.register_callback("CAM", camInfo)
 
     LBmqtt.publish("PR2/A9/estado", "Puente activo")
     
@@ -113,7 +114,32 @@ def agvEnd(topic, payload):
     SQL.alter(NOMBRETABLAAGV, "estado = %s, carga = %s", (state, load), f"id_robot = '{agv_id}'")
     #LBmqtt.publish(f"PR2/A9/estado/{agv_id}", f"Estado del AGV {agv_id} es: {state} con una carga de: {load}%")
 
+def camInfo(topic, payload):
+    tag = ("id_usuario,ip")
+    NOMBRETABLACAM = "userinfo"
+    NOMBRETABLALOGIN = "logininfo"
+
+    try:
+        data = json.loads(payload)
+        cam_id = data.get("ID")
+        urlid = data.get("data")
+    except json.JSONDecodeError:
+        print("Error al decodificar el JSON")
+        return
+    
+    if not cam_id or not cam_id.startswith("CAM_"):
+        print(f"ID de cámara no válido: {cam_id}")
+        return
+    
+    result = SQL.request(f"SELECT id_usuario FROM {NOMBRETABLACAM} WHERE dataid = '{urlid}'")
+    if result is None or len(result) == 0:
+        print(f"ID de cámara no encontrado: {cam_id}")
+        return
+    
+    LBmqtt.publish(f"PR2/A9/login", f"Se logueando el usuario {result[0][0]}")
+    SQL.uploadBD(NOMBRETABLALOGIN, tag, (result[0][0], cam_id))
+
+
 init()
 
-while True:
-    pass
+LBmqtt._client.loop_forever()
