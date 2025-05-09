@@ -142,4 +142,6 @@ def camInfo(topic, payload):
 
 init()
 
+while True:
+    pass
 LBmqtt.loop()
