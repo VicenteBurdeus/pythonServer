@@ -36,7 +36,7 @@ def setup_mqtt(client_id=None, broker=BROKERREMOTE, port=1883):
     _client = mqtt.Client(client_id=client_id)
     _client.on_message = on_message
     _client.connect(broker, port)
-    _client.loop_start()
+    #_client.loop_start()
 
     # Suscripción general a todos los topics bajo el prefijo
     if _GLOBAL_TOPIC_PREFIX:
