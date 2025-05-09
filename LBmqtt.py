@@ -60,7 +60,7 @@ def publish(topic, message, qos=2, retain=False):
     else:
         raise RuntimeError("MQTT no está inicializado. Llama a setup_mqtt primero.")
     
-def loop():
+def get_client():
     """Mantiene el bucle de eventos MQTT activo."""
     if _client:
         _client.loop_stop()
