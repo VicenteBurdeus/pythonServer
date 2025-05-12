@@ -8,6 +8,8 @@ _client = None
 _lock = threading.Lock()
 
 _GLOBAL_TOPIC_PREFIX = "PR2/A9/"
+_GLOBAL_CALLBACKS = None
+
 
 BROKER="0.0.0.0"
 BROKERREMOTE="100.93.177.37"
@@ -19,10 +21,20 @@ def register_callback(sub_topic, callback):
         full_topic = _GLOBAL_TOPIC_PREFIX + sub_topic
         _callbacks.append((full_topic, callback))
 
+def register_global_callback(callback):
+    """Registra una función callback global que se ejecuta para todos los mensajes."""
+    global _GLOBAL_CALLBACKS
+    _GLOBAL_CALLBACKS = callback
+
 def on_message(client, userdata, msg):
     topic = msg.topic
     payload = msg.payload.decode()
 
+    # Callback global primero (si existe)
+    if _GLOBAL_CALLBACKS:
+        threading.Thread(target=_GLOBAL_CALLBACKS, args=(topic, payload), daemon=True).start()
+
+    # Callbacks por subtopic
     with _lock:
         for sub_topic, callback in _callbacks:
             if topic_matches_sub(sub_topic, topic):
@@ -36,7 +48,7 @@ def setup_mqtt(client_id=None, broker=BROKERREMOTE, port=1883):
     _client = mqtt.Client(client_id=client_id)
     _client.on_message = on_message
     _client.connect(broker, port)
-    #_client.loop_start()
+    _client.loop_start()
 
     # Suscripción general a todos los topics bajo el prefijo
     if _GLOBAL_TOPIC_PREFIX:
@@ -59,7 +71,3 @@ def publish(topic, message, qos=2, retain=False):
         _client.publish(f"{_GLOBAL_TOPIC_PREFIX}{topic}", message, qos, retain)
     else:
         raise RuntimeError("MQTT no está inicializado. Llama a setup_mqtt primero.")
-    
-def get_client():
-    """Devuelve el cliente MQTT actual."""
-    return _client

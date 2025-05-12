@@ -6,9 +6,10 @@ import json
 import where as W
 import LBmqtt
 import PostSQTcom as SQL
+import Parses as P
 
 
-def parse_float(value):
+'''def parse_float(value):
     if value is None:
         return None
     """Convierte un valor de texto en un número flotante, manejando comas y redondeo."""
@@ -33,7 +34,7 @@ def parse_int(value):
     except ValueError as e:
         print(f"Error al convertir el valor '{value}' a entero: {e}")
         return None  # Devuelve None si no puede convertirse
-
+'''
 def init():
     # Inicializa el socket y la conexión a la base de datos
     LBmqtt.disconnect()
@@ -46,10 +47,12 @@ def init():
     else:
         raise RuntimeError("Error en la configuración del puente")
 
+    # Asigna las funciona por topic
     LBmqtt.register_callback("debug", debug)  # Callback para el estado del puente
     LBmqtt.register_callback("NT", NodeTemperature)
     LBmqtt.register_callback("AGV", agvEnd)
     LBmqtt.register_callback("CAM", camInfo)
+    
 
     LBmqtt.publish("PR2/A9/estado", "Puente activo")
     
@@ -64,11 +67,11 @@ def NodeTemperature(topic, payload):
     try:
         data = json.loads(payload)
         node_id = data.get("ID")
-        temperature = parse_float(data.get("temperatura"))
-        humidity = parse_int(data.get("humedad"))
+        temperature = P.parse_float(data.get("temperatura"))
+        humidity = P.parse_int(data.get("humedad"))
 
         # Battery puede ser None si no está o no es un número
-        raw_battery = parse_int(data.get("battery"))
+        raw_battery = P.parse_int(data.get("battery"))
         try:
             battery = int(raw_battery) if raw_battery is not None else None
         except (ValueError, TypeError):
@@ -107,7 +110,7 @@ def agvEnd(topic, payload):
         data = json.loads(payload)
         agv_id = data.get("ID")
         state = data.get("estado")
-        load = parse_int(data.get("carga"))
+        load = P.parse_int(data.get("carga"))
     except json.JSONDecodeError:
         print("Error al decodificar el JSON")
         return
@@ -142,5 +145,5 @@ def camInfo(topic, payload):
 
 init()
 
-temp = LBmqtt.get_client()
-temp.loop_forever()
+while True:
+    pass
