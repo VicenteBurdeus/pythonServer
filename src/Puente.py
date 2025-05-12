@@ -2,64 +2,81 @@ import socket
 import threading
 import time
 import json
+from uuid import uuid4 as uuid
 
 import where as W
-import LBmqtt
+import LBmqtt as LBmqtt
 import PostSQTcom as SQL
 import Parses as P
 
+TOPIC_MAP = {}
 
-'''def parse_float(value):
-    if value is None:
-        return None
-    """Convierte un valor de texto en un número flotante, manejando comas y redondeo."""
-    if isinstance(value, str):
-        # Reemplaza las comas por puntos
-        value = value.replace(",", ".")
-    try:
-        # Convierte el valor a float y lo redondea a 2 decimales (puedes ajustar la precisión)
-        return round(float(value), 2)
-    except ValueError:
-        print(f"Error al convertir el valor a float: {value}")
-        return None
-
-def parse_int(value):
-    if value is None:
-        return None
-    """Convierte un valor de texto en un número entero, manejando comas y redondeo."""
-    if isinstance(value, str):
-        value = value.replace(",", ".").strip()  # Reemplaza las comas por puntos y elimina espacios
-    try:
-        return round(float(value))  # Convierte el valor a float y luego lo redondea a entero
-    except ValueError as e:
-        print(f"Error al convertir el valor '{value}' a entero: {e}")
-        return None  # Devuelve None si no puede convertirse
-'''
 def init():
     # Inicializa el socket y la conexión a la base de datos
     LBmqtt.disconnect()
-    if W.PCSERVIDOR == 0:
-        LBmqtt.setup_mqtt(client_id="Puente_Server",broker=LBmqtt.BROKER, port=1883)
-    elif W.PCSERVIDOR < 100:
-        LBmqtt.setup_mqtt(client_id=f"Puente{W.PCSERVIDOR}",broker=LBmqtt.BROKERREMOTE, port=1883)
-    elif W.PCSERVIDOR >= 100:
-        LBmqtt.setup_mqtt(client_id=f"Puente_NO_VPN{W.PCSERVIDOR}",broker=LBmqtt.BROKERREMOTE, port=1883)
-    else:
-        raise RuntimeError("Error en la configuración del puente")
+    print("Conectando al broker MQTT...")
+    LBmqtt.setup_mqtt(client_id=f"{uuid()}", broker=LBmqtt.BROKER, port=LBmqtt.PORT)
+    
+    LBmqtt.register_callback("#", mqtt_global_handler)  # Callback para el estado del puente
+    cargar_topics_en_memoria()  # Carga los topics en memoria
+
 
     # Asigna las funciona por topic
     LBmqtt.register_callback("debug", debug)  # Callback para el estado del puente
     LBmqtt.register_callback("NT", NodeTemperature)
     LBmqtt.register_callback("AGV", agvEnd)
     LBmqtt.register_callback("CAM", camInfo)
+    print("Se a establecido los callbacks")
+
     
 
     LBmqtt.publish("PR2/A9/estado", "Puente activo")
+    #intenta conectar a la base de datos
+    try:
+        SQL._ensure_connection()
+        LBmqtt.publish("PR2/A9/estado", "Conexión a la base de datos exitosa")
+    except Exception as e:
+        print(f"[DB] Error al conectar con la base de datos: {e}")
+        LBmqtt.publish("PR2/A9/estado", f"Error de conexión a la base de datos: {e}")
+        raise
+
     
 def debug(topic, payload):
     LBmqtt.publish("PR2/A9/estado", f"Estado del puente: {payload}")
+    cargar_topics_en_memoria()
+
+def cargar_topics_en_memoria():
+    """Carga todos los topics de la base de datos a memoria."""
+    global TOPIC_MAP
+    try:
+        registros = SQL.request("SELECT id_topic, topic FROM mqtt_topics")
+        TOPIC_MAP = {t[1].strip(): t[0] for t in registros}
+        print(f"[TOPICS] Se han cargado {len(TOPIC_MAP)} topics en memoria.")
+    except Exception as e:
+        print(f"[TOPICS] Error al cargar topics: {e}")
+        LBmqtt.publish("db/status", f"Error al cargar topics: {e}")
+        raise
+
+def mqtt_global_handler(topic, payload):
+    global TOPIC_MAP
+    try:
+        # Verifica si el topic existe en la base de datos
+        if topic not in TOPIC_MAP:
+            SQL.uploadBD("mqtt_topics", "topic", (topic,))
+            cargar_topics_en_memoria()
+        payload_clean = payload.replace("\n","").replace("\r", "").strip()
+        SQL.uploadBD("mqtt_datos", "id_dato, payload", (TOPIC_MAP[topic], payload_clean))
+    except Exception as e:
+        print(f"[MQTT] Error al manejar el topic {topic}: {e}")
+        #LBmqtt.publish("db/status", f"Error al manejar el topic {topic}: {e}")
+        raise
+
+
+    
+
 
 def NodeTemperature(topic, payload):
+
     tags = ("id_nodo, temperatura, humedad, bateria")
     tagsnobattery = ("id_nodo, temperatura, humedad")
     NOMBRETABLANT = "ntdato"
@@ -94,13 +111,11 @@ def NodeTemperature(topic, payload):
         
     #LBmqtt.publish(f"PR2/A9/temperatura/{node_id}", f"Temperatura del nodo {node_id} es de: {temperature}°C con una humadad de: {humidity}%")
     
-    if W.PCSERVIDOR == 0:
-        if battery is not None:
-            SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
-        else:
-            SQL.uploadBD(NOMBRETABLANT, tagsnobattery, (node_id, temperature, humidity))
+
+    if battery is not None:
+        SQL.uploadBD(NOMBRETABLANT, tags, (node_id, temperature, humidity, battery))
     else:
-        print(f"ID: {node_id}, Temperatura: {temperature}, Humedad: {humidity}, Batería: {battery}")
+        SQL.uploadBD(NOMBRETABLANT, tagsnobattery, (node_id, temperature, humidity))
 
 def agvEnd(topic, payload):
     tags = ("id_robot, estado, carga")

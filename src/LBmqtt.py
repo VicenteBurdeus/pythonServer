@@ -11,7 +11,7 @@ _GLOBAL_TOPIC_PREFIX = "PR2/A9/"
 _GLOBAL_CALLBACKS = None
 
 
-BROKER="0.0.0.0"
+BROKER="mosquitto"
 BROKERREMOTE="100.93.177.37"
 PORT=1883
 
@@ -55,6 +55,7 @@ def setup_mqtt(client_id=None, broker=BROKERREMOTE, port=1883):
         _client.subscribe(f"{_GLOBAL_TOPIC_PREFIX}#")
     else:
         raise ValueError("El prefijo global no está definido.")
+    print(f"[MQTT] Conectado a {broker}:{port} con ID {client_id}")
 
 
 def disconnect():
