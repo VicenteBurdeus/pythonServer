@@ -33,14 +33,14 @@ def init():
 
     
 
-    LBmqtt.publish("PR2/A9/estado", "Puente activo")
+    LBmqtt.publish("estado", "Puente activo")
     #intenta conectar a la base de datos
     try:
         SQL._ensure_connection()
-        LBmqtt.publish("PR2/A9/estado", "Conexión a la base de datos exitosa")
+        LBmqtt.publish("estado", "Conexión a la base de datos exitosa")
     except Exception as e:
         print(f"[DB] Error al conectar con la base de datos: {e}")
-        LBmqtt.publish("PR2/A9/estado", f"Error de conexión a la base de datos: {e}")
+        LBmqtt.publish("estado", f"Error de conexión a la base de datos: {e}")
         raise
 
     
