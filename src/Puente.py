@@ -17,10 +17,13 @@ def init():
     print("Conectando al broker MQTT...")
     LBmqtt.setup_mqtt(client_id=f"{uuid()}", broker=LBmqtt.BROKER, port=LBmqtt.PORT)
     
-    LBmqtt.register_callback("#", mqtt_global_handler)  # Callback para el estado del puente
+
     cargar_topics_en_memoria()  # Carga los topics en memoria
+    for topic in TOPIC_MAP:
+        print(f"Topic: {topic} -> ID: {TOPIC_MAP[topic]}")
 
 
+    LBmqtt.register_callback("#", mqtt_global_handler)  # Callback para el estado del puente
     # Asigna las funciona por topic
     LBmqtt.register_callback("debug", debug)  # Callback para el estado del puente
     LBmqtt.register_callback("NT", NodeTemperature)
