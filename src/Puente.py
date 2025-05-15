@@ -127,11 +127,46 @@ def agvEnd(topic, payload):
     try:
         data = json.loads(payload)
         agv_id = data.get("ID")
-        state = data.get("estado")
-        load = P.parse_int(data.get("carga"))
+        concepto = data.get("Concepto")
+        tipo = P.parse_int(data.get("Tipo"))
     except json.JSONDecodeError:
         print("Error al decodificar el JSON")
         return
+    
+    # Asegura que agv_id contenga AGV_
+    if not agv_id or not agv_id.startswith("AGV_"):
+        print(f"ID de AGV no válido: {agv_id}")
+        return
+    if concepto == "Estanteria_vacia":
+        return
+
+    if concepto == "Dejar":
+        state = "Ocupado"
+        load = 98
+        datosEstanteria = SQL.request(f"SELECT fila, columna, lado, id_almacen FROM estanteria;") 
+    else:
+        state = "Libre"
+        load = 96
+
+    if datosEstanteria is None or len(datosEstanteria) == 0:
+        fila, columna, lado, almacen = datosEstanteria[0]
+    else:
+        fila = f"1"
+        columna = f"0"
+        lado = f"A"
+        almacen = f"3"
+
+    mensaje = {
+        "ID": F"{agv_id}",
+        "Almacen": f"{almacen}",
+        "Fila": f"{fila}",
+        "Lado": f"{lado}",
+        "Columna": f"{columna}",
+        "Concepto": "Estanteria_vacia"
+    }
+    mensaje = json.dumps(mensaje)
+    LBmqtt.publish(f"RoboDK/AGV", mensaje)
+
     SQL.alter(NOMBRETABLAAGV, "estado = %s, carga = %s", (state, load), f"id_robot = '{agv_id}'")
     #LBmqtt.publish(f"PR2/A9/estado/{agv_id}", f"Estado del AGV {agv_id} es: {state} con una carga de: {load}%")
 
