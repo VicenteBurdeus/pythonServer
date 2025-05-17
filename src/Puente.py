@@ -155,13 +155,14 @@ def agvEnd(topic, payload):
         else:
             fila, columna, lado, almacen = datosEstanteria[0]
             mensaje = {
-                "ID": F"{agv_id}",
-                "Almacen": f"{almacen}",
-                "Fila": f"{fila}",
-                "Lado": f"{lado}",
-                "Columna": f"{columna}",
-                "Concepto": "Estanteria_vacia"
+            "ID": f"{agv_id}".replace(" ", ""),
+            "Almacen": f"{almacen}".replace(" ", ""),
+            "Fila": f"{fila}".replace(" ", ""),
+            "Lado": f"{lado}".replace(" ", ""),
+            "Columna": f"{columna}".replace(" ", ""),
+            "Concepto": "Estanteria_vacia"
             }
+
             mensaje = json.dumps(mensaje)
             LBmqtt.publish(f"RoboDK/AGV", mensaje)
             #SQL.alter(NOMBRETABLAAGV, "estado = %s, carga = %s", (state, load), f"id_robot = '{agv_id}'")
