@@ -23,3 +23,4 @@ def parse_int(value):
     except ValueError as e:
         print(f"Error al convertir el valor '{value}' a entero: {e}")
         return None  # Devuelve None si no puede convertirse
+    

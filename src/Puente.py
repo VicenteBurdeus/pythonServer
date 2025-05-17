@@ -27,7 +27,7 @@ def init():
     # Asigna las funciona por topic
     LBmqtt.register_callback("debug", debug)  # Callback para el estado del puente
     LBmqtt.register_callback("NT", NodeTemperature)
-    LBmqtt.register_callback("AGV", agvEnd)
+    LBmqtt.register_callback("RoboDK/AGV", agvEnd)
     LBmqtt.register_callback("CAM", camInfo)
     print("Se a establecido los callbacks")
 
@@ -123,6 +123,7 @@ def NodeTemperature(topic, payload):
 def agvEnd(topic, payload):
     tags = ("id_robot, estado, carga")
     NOMBRETABLAAGV = "robotagvinfo"
+    datosEstanteria = None
 
     try:
         data = json.loads(payload)
@@ -137,38 +138,33 @@ def agvEnd(topic, payload):
     if not agv_id or not agv_id.startswith("AGV_"):
         print(f"ID de AGV no válido: {agv_id}")
         return
-    if concepto == "Estanteria_vacia":
+    if concepto == "Estanteria_vacia":#El mensje de la estanteria va a otro destinatario
+        return
+    
+    if concepto == "Reset":#resetea el estado la las estanterias de la bbdd
+        SQL.alter("estanteria", "estado = %s", ("Libre",), "estado = 'llena'")
         return
 
-    if concepto == "Dejar":
-        state = "Ocupado"
-        load = 98
-        datosEstanteria = SQL.request(f"SELECT fila, columna, lado, id_almacen FROM estanteria;") 
-    else:
-        state = "Libre"
-        load = 96
+    if concepto == "Bucando estanteria":
 
-    if datosEstanteria is None or len(datosEstanteria) == 0:
-        fila, columna, lado, almacen = datosEstanteria[0]
-    else:
-        fila = f"1"
-        columna = f"0"
-        lado = f"A"
-        almacen = f"3"
-
-    mensaje = {
-        "ID": F"{agv_id}",
-        "Almacen": f"{almacen}",
-        "Fila": f"{fila}",
-        "Lado": f"{lado}",
-        "Columna": f"{columna}",
-        "Concepto": "Estanteria_vacia"
-    }
-    mensaje = json.dumps(mensaje)
-    LBmqtt.publish(f"RoboDK/AGV", mensaje)
-
-    SQL.alter(NOMBRETABLAAGV, "estado = %s, carga = %s", (state, load), f"id_robot = '{agv_id}'")
-    #LBmqtt.publish(f"PR2/A9/estado/{agv_id}", f"Estado del AGV {agv_id} es: {state} con una carga de: {load}%")
+        datosEstanteria = SQL.request("""WITH updated AS (UPDATE estanteria SET status = 'llena' WHERE id_estanteria = (SELECT id_estanteria FROM estanteria WHERE status = 'vacia' ORDER BY id_almacen, fila, columna, lado LIMIT 1) RETURNING fila, columna, lado, id_almacen ) SELECT * FROM updated;""")
+        
+        if datosEstanteria is None or len(datosEstanteria) == 0:
+            LBmqtt.publish("PR2/A9/alerta", f"No hay estanterías vacías disponibles para el {agv_id}")
+            return
+        else:
+            fila, columna, lado, almacen = datosEstanteria[0]
+            mensaje = {
+                "ID": F"{agv_id}",
+                "Almacen": f"{almacen}",
+                "Fila": f"{fila}",
+                "Lado": f"{lado}",
+                "Columna": f"{columna}",
+                "Concepto": "Estanteria_vacia"
+            }
+            mensaje = json.dumps(mensaje)
+            LBmqtt.publish(f"RoboDK/AGV", mensaje)
+            #SQL.alter(NOMBRETABLAAGV, "estado = %s, carga = %s", (state, load), f"id_robot = '{agv_id}'")
 
 def camInfo(topic, payload):
     tag = ("id_usuario,ip")
@@ -197,6 +193,8 @@ def camInfo(topic, payload):
 
 
 init()
+
+# el loop for ever no funciona
 
 while True:
     pass

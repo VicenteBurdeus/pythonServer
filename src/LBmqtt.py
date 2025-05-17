@@ -72,3 +72,4 @@ def publish(topic, message, qos=2, retain=False):
         _client.publish(f"{_GLOBAL_TOPIC_PREFIX}{topic}", message, qos, retain)
     else:
         raise RuntimeError("MQTT no está inicializado. Llama a setup_mqtt primero.")
+    
