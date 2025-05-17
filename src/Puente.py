@@ -142,7 +142,7 @@ def agvEnd(topic, payload):
         return
     
     if concepto == "Reset":#resetea el estado la las estanterias de la bbdd
-        SQL.alter("estanteria", "estado = %s", ("Libre",), "estado = 'llena'")
+        SQL.alter("estanteria", "status = %s", ("vacia",), "1 = 1")
         return
 
     if concepto == "Bucando estanteria":
